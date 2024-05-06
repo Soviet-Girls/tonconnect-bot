@@ -31,6 +31,9 @@ bot = Bot(config.TOKEN, parse_mode=ParseMode.HTML)
 
 chat_links = {}
 
+with open("rules.txt", "r") as file:
+    rules = file.read()
+
 @dp.message(CommandStart())
 async def command_start_handler(message: Message):
     chat_id = message.chat.id
@@ -89,7 +92,7 @@ async def new_members_handler(message: Message):
         )
     else:
         await bot.revoke_chat_invite_link(chat_id=group_chat_id, invite_link=invite_link)
-        await bot.send_message(message.chat.id, f"Добро пожаловать, {new_member.first_name}!")
+        await bot.send_message(message.chat.id, f"Добро пожаловать, {new_member.first_name}! Пожалуйста, ознакомьтесь с правилами.\n\n{rules}")
 
 
 async def connect_wallet(message: Message, wallet_name: str):
