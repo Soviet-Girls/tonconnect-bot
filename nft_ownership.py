@@ -2,8 +2,6 @@ import requests
 import config
 
 
-
-
 def check(address: str) -> bool:
     url = f'https://tonapi.io/v2/accounts/{address}/nfts'
     params = {

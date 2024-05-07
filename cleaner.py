@@ -25,7 +25,7 @@ async def clean(bot: Bot):
         connector = get_connector(user_id)
         connected = await connector.restore_connection()
         if connected is False:
-            await bot.send_message(group_chat_id, f"Пользователь разорвал подключение!")
+            await bot.send_message(group_chat_id, "Пользователь разорвал подключение!")
             await bot.ban_chat_member(group_chat_id, user_id)
             await bot.unban_chat_member(group_chat_id, user_id)
             await client.delete(str(user_id)+'connection')
@@ -41,7 +41,7 @@ async def clean(bot: Bot):
             if nft_ownership.check(wallet_address):
                 continue
             else:
-                await bot.send_message(group_chat_id, f"Пользователь не имеет NFT из коллекции!")
+                await bot.send_message(group_chat_id, "Пользователь не имеет NFT из коллекции!")
                 await bot.ban_chat_member(group_chat_id, user_id)
                 await bot.unban_chat_member(group_chat_id, user_id)
                 await client.delete(str(user_id)+'connection')

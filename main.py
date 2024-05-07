@@ -151,7 +151,7 @@ async def connect_wallet(message: Message, wallet_name: str):
 
     mk_b = InlineKeyboardBuilder()
     mk_b.button(text='Старт', callback_data='start')
-    await message.answer(f'Время для подключения вышло!', reply_markup=mk_b.as_markup())
+    await message.answer('Время для подключения вышло!', reply_markup=mk_b.as_markup())
 
 
 async def disconnect_wallet(message: Message):
