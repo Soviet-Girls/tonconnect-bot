@@ -23,6 +23,7 @@ async def check(address: str) -> bool:
             if response['error'] == 'rate limit: free tier':
                 await asyncio.sleep(3)
                 _t += 1
+                continue
         except KeyError:
             pass
         return len(response['nft_items']) != 0
