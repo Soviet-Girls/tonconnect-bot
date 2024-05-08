@@ -92,7 +92,7 @@ async def new_members_handler(message: Message):
         )
     else:
         await bot.revoke_chat_invite_link(chat_id=group_chat_id, invite_link=invite_link)
-        await bot.send_message(message.chat.id, f"Добро пожаловать, {new_member.first_name}! Пожалуйста, ознакомьтесь с правилами.\n\n{rules}")
+        await bot.send_message(message.chat.id, f"Добро пожаловать, {new_member.first_name}! Пожалуйста, ознакомьтесь с правилами в закрепленном сообщении.")
 
 
 async def connect_wallet(message: Message, wallet_name: str):
