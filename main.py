@@ -128,7 +128,7 @@ async def connect_wallet(message: Message, wallet_name: str):
             if connector.account.address:
                 wallet_address = connector.account.address
                 wallet_address = Address(wallet_address).to_str(is_bounceable=False)
-                owner = nft_ownership.check(wallet_address)
+                owner = await nft_ownership.check(wallet_address)
                 if owner:
                     bot_message = 'Вы являетесь владельцем NFT из коллекции Soviet Girls. Ссылка на вход в беседу действительна 1 минуту.'
                     link = await bot.create_chat_invite_link(

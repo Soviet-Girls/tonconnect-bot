@@ -38,7 +38,8 @@ async def clean(bot: Bot):
         else:
             wallet_address = connector.account.address
             wallet_address = Address(wallet_address).to_str(is_bounceable=False)
-            if nft_ownership.check(wallet_address):
+            owner = await nft_ownership.check(wallet_address)
+            if owner:
                 continue
             else:
                 await bot.send_message(group_chat_id, "Пользователь не имеет NFT из коллекции!")
