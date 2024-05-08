@@ -12,4 +12,5 @@ def check(address: str) -> bool:
     }
     response = requests.get(url=url, params=params)
     response = response.json()
+    print(response)
     return len(response['nft_items']) != 0
