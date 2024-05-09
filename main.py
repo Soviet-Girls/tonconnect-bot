@@ -42,6 +42,9 @@ with open("rules.txt", "r") as file:
 @dp.message(CommandStart())
 async def command_start_handler(message: Message):
     chat_id = message.chat.id
+    if chat_id < 0:
+        await message.answer('Эта команда доступна только в личных сообщениях!')
+        return
     print(chat_id)
     if chat_id < 0:
         return
@@ -110,6 +113,7 @@ async def new_members_handler(message: Message):
 
 async def connect_wallet(message: Message, wallet_name: str):
     if message.chat.id < 0:
+        await message.answer('Эта команда доступна только в личных сообщениях!')
         return
     connector = get_connector(message.chat.id)
 
@@ -169,6 +173,7 @@ async def connect_wallet(message: Message, wallet_name: str):
 
 async def disconnect_wallet(message: Message):
     if message.chat.id < 0:
+        await message.answer('Эта команда доступна только в личных сообщениях!')
         return
     connector = get_connector(message.chat.id)
     await connector.restore_connection()
