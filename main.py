@@ -16,6 +16,8 @@ import cleaner
 
 from connector import get_connector
 
+from aiogram.client.session.aiohttp import AiohttpSession
+
 from aiogram import Bot, Dispatcher, F
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart, Command
@@ -27,7 +29,8 @@ group_chat_id = -1002137181356
 logger = logging.getLogger(__file__)
 
 dp = Dispatcher()
-bot = Bot(config.TOKEN, parse_mode=ParseMode.HTML)
+session = AiohttpSession(proxy='socks5://35.229.105.131:11080')
+bot = Bot(config.TOKEN, session=session, parse_mode=ParseMode.HTML)
 
 chat_links = {}
 
