@@ -14,6 +14,8 @@ import config
 import nft_ownership
 import cleaner
 
+from data.sales import sales
+
 from connector import get_connector
 
 from aiogram.client.session.aiohttp import AiohttpSession
@@ -80,7 +82,15 @@ async def clear(message: Message):
         return
     banned = await cleaner.clean(bot)
     await message.answer(text=f"Забанено {banned}")
-    
+
+@dp.message(Command('rules'))
+async def rules(message: Message):
+    await message.answer(rules)
+
+@dp.message(Command('stats'))
+async def stats(message: Message):
+    await sales.update()
+    await message.answer(str(sales))
 
 
 @dp.message(F.new_chat_members)
@@ -95,7 +105,7 @@ async def new_members_handler(message: Message):
         )
     else:
         await bot.revoke_chat_invite_link(chat_id=group_chat_id, invite_link=invite_link)
-        await bot.send_message(message.chat.id, f"Добро пожаловать, {new_member.first_name}! Пожалуйста, ознакомьтесь с правилами в закрепленном сообщении.")
+        await bot.send_message(message.chat.id, f"Добро пожаловать, {new_member.first_name}! Пожалуйста, ознакомьтесь с правилами: /rules.")
 
 
 async def connect_wallet(message: Message, wallet_name: str):
