@@ -13,17 +13,20 @@ from pytonconnect import TonConnect
 import config
 import nft_ownership
 import cleaner
+import search
+
 
 from data.sales import sales
+from data.nft import NftItems
 
 from connector import get_connector
 
 from aiogram.client.session.aiohttp import AiohttpSession
 
-from aiogram import Bot, Dispatcher, F
+from aiogram import Bot, Dispatcher, types, F
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart, Command
-from aiogram.types import Message, CallbackQuery, BufferedInputFile
+from aiogram.types import Message, CallbackQuery, BufferedInputFile, InlineQueryResultPhoto
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 group_chat_id = -1002137181356
@@ -197,6 +200,75 @@ async def main_callback_handler(call: CallbackQuery):
         data = data.split(':')
         if data[0] == 'connect':
             await connect_wallet(message, data[1])
+
+
+@dp.inline_query()
+async def inline_query(inline_query: types.InlineQuery):
+    chat_id = inline_query.from_user.id
+    connector = get_connector(chat_id)
+    connected = await connector.restore_connection()
+    if connected:
+        wallet_address = connector.account.address
+        wallet_address = Address(wallet_address).to_str(is_bounceable=False)
+    else:
+        return
+    text = inline_query.query or '-_-_-'
+    inline_query.answer
+    print(text)
+    _i = 0
+    content = []
+    if text != "-_-_-":
+        results = search.find(text)
+        for result in results:
+            if _i == 10:
+                break
+            price, rarity = await search.get_item(result['address'])
+            text = f"<b>{result['name']}</b> ✅\nРедкость: {rarity}/283"
+            if price:
+                text += f"\n<b>{price} TON</b>"
+            mk_b = InlineKeyboardBuilder()
+            mk_b.button(text='Открыть в GetGems', url=f"https://getgems.io/nft/{result['address']}")
+            content.append(
+                InlineQueryResultPhoto(
+                    id=str(_i),
+                    photo_url=result['content']['image']['sized'],
+                    thumbnail_url=result['content']['image']['sized'],
+                    title=result['name'],
+                    reply_markup=mk_b.as_markup(),
+                    caption=text,
+                    parse_mode=ParseMode.HTML
+                )
+            )
+            _i += 1
+        await bot.answer_inline_query(inline_query.id, results=content)
+
+    
+    nft_parser = NftItems(wallet_address)
+    nft_items = await nft_parser.get()
+    content = []
+    _i = 0
+    for item in nft_items:
+        if _i == 10:
+            break
+        mk_b = InlineKeyboardBuilder()
+        mk_b.button(text='Открыть в GetGems', url=f"https://getgems.io/nft/{item.address}")
+        verify = "✅" if item.verify else ""
+        text = f"<b>{item.name}</b> {verify}\nРедкость: {item.rarity}/283"
+        if item.price:
+            text += f"\n<b>{item.price} TON</b>"
+        content.append(
+            InlineQueryResultPhoto(
+                id=str(_i),
+                photo_url=item.image,
+                thumbnail_url=item.image,
+                title=item.name,
+                reply_markup=mk_b.as_markup(),
+                caption=text,
+                parse_mode=ParseMode.HTML
+            )
+        )
+        _i += 1
+    await bot.answer_inline_query(inline_query.id, results=content)
 
 
 async def main() -> None:

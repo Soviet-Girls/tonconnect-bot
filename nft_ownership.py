@@ -27,3 +27,16 @@ async def check(address: str) -> bool:
         except KeyError:
             pass
         return len(response['nft_items']) != 0
+    
+
+async def get_nfts(address: str) -> list:
+    url = f'https://tonapi.io/v2/accounts/{address}/nfts'
+    params = {
+        'collection': config.COLLECTION,
+        'limit': 10,
+        'offset': 0,
+        'indirect_ownership': 1
+    }
+    response = requests.get(url=url, params=params)
+    response = response.json()
+    return response['nft_items']
