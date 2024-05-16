@@ -1,4 +1,5 @@
 from db_connection import client
+from config import TESTNET
 
 class ChatLinksStorage:
 
@@ -6,7 +7,8 @@ class ChatLinksStorage:
         pass
 
     def _get_key(self, key: str):
-        return 'link_' + key
+        testnet = 't' if TESTNET else ''
+        return testnet+'link_' + key
     
     async def set_item(self, key: str, value: str):
         await client.set(name=self._get_key(key), value=value)

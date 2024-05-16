@@ -29,7 +29,6 @@ from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, CallbackQuery, BufferedInputFile, InlineQueryResultPhoto
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-group_chat_id = -1002137181356
 
 logger = logging.getLogger(__file__)
 
@@ -38,6 +37,8 @@ session = AiohttpSession(proxy='socks5://35.229.105.131:11080')
 bot = Bot(config.TOKEN, session=session, parse_mode=ParseMode.HTML)
 
 chat_links = {}
+
+testnet = 't' if config.TESTNET else ''
 
 with open("rules.txt", "r") as file:
     rules = file.read()
@@ -56,17 +57,17 @@ async def command_start_handler(message: Message):
 
     mk_b = InlineKeyboardBuilder()
     if connected:
-        mk_b.button(text='Отключить', callback_data='disconnect')
+        mk_b.button(text='Отключить', callback_data=f'{testnet}disconnect')
         await message.answer(text='Кошелёк уже подключен!', reply_markup=mk_b.as_markup())
 
     else:
         wallets_list = TonConnect.get_wallets()
         for wallet in wallets_list:
-            mk_b.button(text=wallet['name'], callback_data=f'connect:{wallet["name"]}')
+            mk_b.button(text=wallet['name'], callback_data=f'{testnet}connect:{wallet["name"]}')
         mk_b.adjust(1, )
         await message.answer(text='Выберите кошелёк для подключения:', reply_markup=mk_b.as_markup())
 
-@dp.message(Command('wallet'))
+@dp.message(Command(f'{testnet}wallet'))
 async def get_wallet(message: Message):
     chat_id = message.chat.id
     connector = get_connector(chat_id)
@@ -77,24 +78,25 @@ async def get_wallet(message: Message):
         await message.answer(text=wallet_address)
 
 
-@dp.message(Command('chid'))
+@dp.message(Command(f'{testnet}chid'))
 async def chid(message: Message):
     chat_id = message.chat.id
     await message.answer(text=str(chat_id))
 
-@dp.message(Command('clear'))
+@dp.message(Command(f'{testnet}clear'))
 async def clear(message: Message):
     if message.chat.id != 983564480:
         return
     banned = await cleaner.clean(bot)
     await message.answer(text=f"Забанено {banned}")
 
-@dp.message(Command('rules'))
+@dp.message(Command(f'{testnet}rules'))
 async def rules(message: Message):
-    await message.answer(rules)
+    await message.answer(text=rules, parse_mode=ParseMode.HTML)
 
-@dp.message(Command('stats'))
+@dp.message(Command(f'{testnet}stats'))
 async def stats(message: Message):
+    # TODO add stats for side collections
     await sales.update()
     await message.answer(str(sales))
 
@@ -106,11 +108,11 @@ async def new_members_handler(message: Message):
     invite_link = chat_links.get(new_member.id, None)
     if invite_link is None:
         await bot.ban_chat_member(
-            chat_id=group_chat_id,
+            chat_id=config.GROUP_CHAT_ID,
             user_id=new_member.id
         )
     else:
-        await bot.revoke_chat_invite_link(chat_id=group_chat_id, invite_link=invite_link)
+        await bot.revoke_chat_invite_link(chat_id=config.GROUP_CHAT_ID, invite_link=invite_link)
         await bot.send_message(message.chat.id, f"Добро пожаловать, {new_member.first_name}! Пожалуйста, ознакомьтесь с правилами: /rules.")
 
 
@@ -148,11 +150,11 @@ async def connect_wallet(message: Message, wallet_name: str):
             if connector.account.address:
                 wallet_address = connector.account.address
                 wallet_address = Address(wallet_address).to_str(is_bounceable=False)
-                owner = await nft_ownership.check(wallet_address)
-                if owner:
-                    bot_message = 'Вы являетесь владельцем NFT из коллекции Soviet Girls. Ссылка на вход в беседу действительна 1 минуту.'
+                collections = await nft_ownership.check(wallet_address)
+                for collection in collections:
+                    bot_message = f'Вы являетесь владельцем NFT из коллекции {collection.name}. Ссылка на вход в беседу действительна 1 минуту.'
                     link = await bot.create_chat_invite_link(
-                        chat_id=group_chat_id,
+                        chat_id=collection.chat_id,
                         name=str(message.chat.id),
                         expire_date=int(time.time()+60),
                         member_limit=1
@@ -161,16 +163,16 @@ async def connect_wallet(message: Message, wallet_name: str):
                     print(chat_links)
                     mk_b = InlineKeyboardBuilder()
                     mk_b.button(text='Войти в беседу', url=link.invite_link)
-                else:
-                    bot_message = 'Вы <b>не являетесь</b> владельцем NFT из коллекции Soviet Girls.'
+                if len(collections) == 0:
+                    bot_message = f'Вы <b>не являетесь</b> владельцем NFT из коллекции Soviet Girls. Приобрести NFT: https://getgems.io/sovietgirls.'
                     mk_b = InlineKeyboardBuilder()
-                    mk_b.button(text='Отключить кошелёк', callback_data='disconnect')
+                    mk_b.button(text='Отключить кошелёк', callback_data=f'{testnet}disconnect')
                 await message.answer(f'Вы подключены с адресом <code>{wallet_address}</code>. '+bot_message, reply_markup=mk_b.as_markup())
                 logger.info(f'Connected with address: {wallet_address}')
             return
 
     mk_b = InlineKeyboardBuilder()
-    mk_b.button(text='Старт', callback_data='start')
+    mk_b.button(text='Старт', callback_data=f'{testnet}start')
     await message.answer('Время для подключения вышло!', reply_markup=mk_b.as_markup())
 
 
@@ -192,13 +194,13 @@ async def main_callback_handler(call: CallbackQuery):
     await call.answer()
     message = call.message
     data = call.data
-    if data == "start":
+    if data == f"{testnet}start":
         await command_start_handler(message)
-    elif data == 'disconnect':
+    elif data == f'{testnet}disconnect':
         await disconnect_wallet(message)
     else:
         data = data.split(':')
-        if data[0] == 'connect':
+        if data[0] == f'{testnet}connect':
             await connect_wallet(message, data[1])
 
 

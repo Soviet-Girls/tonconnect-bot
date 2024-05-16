@@ -61,7 +61,7 @@ class Sales:
         self.volume = volume
 
     def __str__(self):
-        return f"💎 Флор: {self.floor} TON\n🏦 Оборот: {self.volume} TON\n👥 Владельцев: {self.owners}"
+        return f"📈 Статистика Soviet Girls TON:\n\n💎 Флор: {self.floor} TON\n🏦 Оборот: {self.volume} TON\n👥 Владельцев: {self.owners}"
         
 
 sales = Sales()

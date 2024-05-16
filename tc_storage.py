@@ -1,6 +1,7 @@
 # tc_storage.py
 
 from pytonconnect.storage import IStorage
+from config import TESTNET
 
 from db_connection import client
 
@@ -10,7 +11,8 @@ class TcStorage(IStorage):
         self.chat_id = chat_id
 
     def _get_key(self, key: str):
-        return str(self.chat_id) + key
+        testnet = 't' if TESTNET else ''
+        return testnet + str(self.chat_id) + key
 
     async def set_item(self, key: str, value: str):
         await client.set(name=self._get_key(key), value=value)

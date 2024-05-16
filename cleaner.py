@@ -25,30 +25,38 @@ async def clean(bot: Bot):
         connector = get_connector(user_id)
         connected = await connector.restore_connection()
         if connected is False:
-            await bot.send_message(group_chat_id, "Пользователь разорвал подключение!")
+            try:
+                user = await bot.get_chat_member(group_chat_id, user_id)
+                if user.status == 'member':
+                    await bot.send_message(group_chat_id, "Пользователь разорвал подключение с ботом! Исключаю из чата c правом на возвращение.")
+            except Exception:
+                pass
             await bot.ban_chat_member(group_chat_id, user_id)
             await bot.unban_chat_member(group_chat_id, user_id)
             await client.delete(str(user_id)+'connection')
 
             i += 1
             try:
-                await bot.send_message(user_id, "Вы были исключены из чата, так как разорвали подключение.")
+                await bot.send_message(user_id, f"Вы были исключены из чата владельцев {collection.name}, так как разорвали подключение. Подключиться снова: /start")
             except:
                 pass
         else:
             wallet_address = connector.account.address
             wallet_address = Address(wallet_address).to_str(is_bounceable=False)
-            owner = await nft_ownership.check(wallet_address)
-            if owner:
+            collections = await nft_ownership.check(wallet_address)
+            if len(collections) > 0:
                 continue
             else:
-                await bot.send_message(group_chat_id, "Пользователь не имеет NFT из коллекции!")
-                await bot.ban_chat_member(group_chat_id, user_id)
-                await bot.unban_chat_member(group_chat_id, user_id)
-                await client.delete(str(user_id)+'connection')
-                i += 1
-                try:
-                    await bot.send_message(user_id, "Вы были исключены из чата, так как не имеете NFT из коллекции.")
-                except:
-                    pass
+                for collection in nft_ownership.side_collections:
+                    user = await bot.get_chat_member(collection.chat_id, user_id)
+                    try: 
+                        if user.status == 'member':
+                            await bot.send_message(collection.chat_id, f"Пользователь не имеет NFT из коллекции {collection.name}! Исключаю из чата c правом на возвращение.")
+                    except Exception:
+                        pass
+                    await bot.send_message(user_id, f"Вы исключены из закрытого чата владельцев {collection.name}, так как не имеете NFT из данной коллекции.")
+                    await bot.ban_chat_member(collection.chat_id, user_id)
+                    await bot.unban_chat_member(collection.chat_id, user_id)
+                    await client.delete(str(user_id)+'connection')
+                    i += 1
     return i
