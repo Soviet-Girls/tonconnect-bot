@@ -165,12 +165,14 @@ async def connect_wallet(message: Message, wallet_name: str):
                     print(chat_links)
                     mk_b = InlineKeyboardBuilder()
                     mk_b.button(text='Войти в беседу', url=link.invite_link)
+                    await message.answer(f'Вы подключены с адресом <code>{wallet_address}</code>. '+bot_message, reply_markup=mk_b.as_markup())
+                    logger.info(f'Connected with address: {wallet_address}')
                 if len(collections) == 0:
                     bot_message = f'Вы <b>не являетесь</b> владельцем NFT из коллекции Soviet Girls. Приобрести NFT: https://getgems.io/sovietgirls.'
                     mk_b = InlineKeyboardBuilder()
                     mk_b.button(text='Отключить кошелёк', callback_data=f'{testnet}disconnect')
-                await message.answer(f'Вы подключены с адресом <code>{wallet_address}</code>. '+bot_message, reply_markup=mk_b.as_markup())
-                logger.info(f'Connected with address: {wallet_address}')
+                    await message.answer(f'Вы подключены с адресом <code>{wallet_address}</code>. '+bot_message, reply_markup=mk_b.as_markup())
+                    logger.info(f'Connected with address: {wallet_address}')
             return
 
     mk_b = InlineKeyboardBuilder()
