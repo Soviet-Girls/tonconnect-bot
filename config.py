@@ -19,3 +19,7 @@ TESTNET = env['TESTNET'] == 'False'
 
 # lead chat id
 GROUP_CHAT_ID = int(env['GROUP_CHAT_ID'])
+
+PROXY = env['PROXY'] = ''
+if PROXY == '':
+    PROXY = None

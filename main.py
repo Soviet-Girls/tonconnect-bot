@@ -33,11 +33,13 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 logger = logging.getLogger(__file__)
 
 dp = Dispatcher()
-session = AiohttpSession(proxy='socks5://35.229.105.131:11080')
-bot = Bot(config.TOKEN, session=session, parse_mode=ParseMode.HTML)
+if config.PROXY is not None:
+    session = AiohttpSession(proxy=config.PROXY)
+    bot = Bot(config.TOKEN, session=session, parse_mode=ParseMode.HTML)
+else:
+    bot = Bot(config.TOKEN, parse_mode=ParseMode.HTML)
 
 chat_links = {}
-
 testnet = 't' if config.TESTNET else ''
 
 with open("rules.txt", "r") as file:
