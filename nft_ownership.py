@@ -12,15 +12,16 @@ class Collection:
         self.address = str(collection['address'])
         self.chat_id = int(collection['chat_id'])
 
-async def load() -> list[Collection]:
+
+def load() -> list[Collection]:
     side_collections = []
-    async with aiofiles.open('side_collections.json', mode='r') as f:
-        side_collections_raw = list(json.load(await f.read()))
+    with open('side_collections.json', 'r') as f:
+        side_collections_raw = list(json.load(f))
     try:
+        import requests
         url = 'https://raw.githubusercontent.com/Soviet-Girls/tonconnect-bot/main/side_collections.json'
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                side_collections_raw_online = list(json.loads(await response.text()))
+        response = requests.get(url)
+        side_collections_raw_online = list(json.loads(response.text))
         if len(side_collections_raw_online) > len(side_collections_raw):
             side_collections_raw = side_collections_raw_online
     except Exception as e:
@@ -30,10 +31,10 @@ async def load() -> list[Collection]:
         side_collections.append(collection)
     return side_collections
 
-_collections = []
+side_collections = []
 try:
-    side_collections = asyncio.run(load())
-    print(f"{len(_collections)}  collections loaded")
+    side_collections = load()
+    print(f"{len(side_collections)}  collections loaded")
 except Exception as e:
     logging.exception(e)
 
