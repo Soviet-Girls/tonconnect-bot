@@ -16,15 +16,15 @@ class SideCollection:
         
 def load() -> list[SideCollection]:
     side_collections = []
+    side_collections_raw = list(json.load(open('side_collections.json')))
     try:
         import requests
         url = 'https://raw.githubusercontent.com/Soviet-Girls/tonconnect-bot/main/side_collections.json'
         side_collections_raw_online = list(json.loads(requests.get(url).text))
-        side_collections_raw_local = list(json.load(open('side_collections.json')))
-        if len(side_collections_raw_online) > len(side_collections_raw_local):
+        if len(side_collections_raw_online) > len(side_collections_raw):
             side_collections_raw = side_collections_raw_online
     except:
-        side_collections_raw = list(json.load(open('side_collections.json')))
+        pass
     for collection in side_collections_raw:
         collection = SideCollection(collection)
         side_collections.append(collection)
@@ -33,6 +33,7 @@ def load() -> list[SideCollection]:
 side_collections = []
 try:
     side_collections = load()
+    print(f"{len(side_collections)} side collections loaded")
 except:
     traceback.print_exc()
     logging.error('ERROR LOADING SIDE COLLECTIONS!')
