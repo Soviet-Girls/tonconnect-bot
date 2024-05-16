@@ -81,4 +81,5 @@ async def check(address: str) -> list[SideCollection]:
                 if len(response['nft_items']) > 0:
                     collections.append(side_collection)
 
+    logging.info(str(collections))
     return collections
