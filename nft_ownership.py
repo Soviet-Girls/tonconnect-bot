@@ -14,10 +14,10 @@ class Collection:
 
 async def load() -> list[Collection]:
     side_collections = []
-    async with aiofiles.open('_collections.json', mode='r') as f:
+    async with aiofiles.open('side_collections.json', mode='r') as f:
         side_collections_raw = list(json.load(await f.read()))
     try:
-        url = 'https://raw.githubusercontent.com/Soviet-Girls/tonconnect-bot/main/_collections.json'
+        url = 'https://raw.githubusercontent.com/Soviet-Girls/tonconnect-bot/main/side_collections.json'
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
                 side_collections_raw_online = list(json.loads(await response.text()))
