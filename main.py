@@ -42,8 +42,7 @@ else:
 chat_links = {}
 testnet = 't' if config.TESTNET else ''
 
-with open("rules.txt", "r") as file:
-    rules = file.read()
+rules_text = open("rules.txt", "r").read()
 
 @dp.message(CommandStart())
 async def command_start_handler(message: Message):
@@ -94,7 +93,7 @@ async def clear(message: Message):
 
 @dp.message(Command(f'{testnet}rules'))
 async def rules(message: Message):
-    await message.answer(text=rules, parse_mode=ParseMode.HTML)
+    await message.answer(text=rules_text, parse_mode=ParseMode.HTML)
 
 @dp.message(Command(f'{testnet}stats'))
 async def stats(message: Message):
