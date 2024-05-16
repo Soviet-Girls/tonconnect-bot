@@ -4,8 +4,7 @@ import sys
 import logging
 import asyncio
 import time
-import qrcode
-from io import BytesIO
+
 
 from pytoniq_core import Address
 from pytonconnect import TonConnect
@@ -18,6 +17,7 @@ import search
 
 from data.sales import sales
 from data.nft import NftItems
+from data import qr_code
 
 from connector import get_connector
 
@@ -93,6 +93,8 @@ async def clear(message: Message):
 
 @dp.message(Command(f'{testnet}rules'))
 async def rules(message: Message):
+    if message.chat.id != config.GROUP_CHAT_ID:
+        return
     await message.answer(text=rules_text, parse_mode=ParseMode.HTML)
 
 @dp.message(Command(f'{testnet}stats'))
@@ -104,6 +106,8 @@ async def stats(message: Message):
 
 @dp.message(F.new_chat_members)
 async def new_members_handler(message: Message):
+    if message.chat.id != config.GROUP_CHAT_ID:
+        return
     new_member = message.new_chat_members[0]
     print(chat_links)
     invite_link = chat_links.get(new_member.id, None)
@@ -135,10 +139,8 @@ async def connect_wallet(message: Message, wallet_name: str):
 
     generated_url = await connector.connect(wallet)
 
-    img = qrcode.make(generated_url)
-    stream = BytesIO()
-    img.save(stream)
-    file = BufferedInputFile(file=stream.getvalue(), filename='qrcode')
+    img = qr_code.generate(generated_url)
+    file = BufferedInputFile(file=img.getvalue(), filename='qrcode')
 
     mk_b = InlineKeyboardBuilder()
     mk_b.button(text='Подключить', url=generated_url)
@@ -152,6 +154,7 @@ async def connect_wallet(message: Message, wallet_name: str):
                 wallet_address = connector.account.address
                 wallet_address = Address(wallet_address).to_str(is_bounceable=False)
                 collections = await nft_ownership.check(wallet_address)
+                await message.answer(f'Вы успешно подключились с адресом <code>{wallet_address}</code>.')
                 for collection in collections:
                     bot_message = f'Вы являетесь владельцем NFT из коллекции {collection.name}. Ссылка на вход в беседу действительна 1 минуту.'
                     link = await bot.create_chat_invite_link(
@@ -164,13 +167,13 @@ async def connect_wallet(message: Message, wallet_name: str):
                     print(chat_links)
                     mk_b = InlineKeyboardBuilder()
                     mk_b.button(text='Войти в беседу', url=link.invite_link)
-                    await message.answer(f'Вы подключены с адресом <code>{wallet_address}</code>. '+bot_message, reply_markup=mk_b.as_markup())
+                    await message.answer(bot_message, reply_markup=mk_b.as_markup())
                     logger.info(f'Connected with address: {wallet_address}')
                 if len(collections) == 0:
                     bot_message = f'Вы <b>не являетесь</b> владельцем NFT из коллекции Soviet Girls. Приобрести NFT: https://getgems.io/sovietgirls.'
                     mk_b = InlineKeyboardBuilder()
                     mk_b.button(text='Отключить кошелёк', callback_data=f'{testnet}disconnect')
-                    await message.answer(f'Вы подключены с адресом <code>{wallet_address}</code>. '+bot_message, reply_markup=mk_b.as_markup())
+                    await message.answer(bot_message, reply_markup=mk_b.as_markup())
                     logger.info(f'Connected with address: {wallet_address}')
             return
 
