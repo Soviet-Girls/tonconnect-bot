@@ -172,7 +172,7 @@ async def connect_wallet(message: Message, wallet_name: str):
                     await message.answer(bot_message, reply_markup=mk_b.as_markup())
                     logger.info(f'Connected with address: {wallet_address}')
                     return
-                        
+                mk_b = InlineKeyboardBuilder()
                 for collection in collections:
                     bot_message = f'Вы являетесь владельцем NFT из коллекции {collection.name}. Ссылка на вход в беседу действительна 1 минуту.'
                     link = await bot.create_chat_invite_link(
@@ -183,7 +183,6 @@ async def connect_wallet(message: Message, wallet_name: str):
                         )
                     chat_links[message.chat.id] = link.invite_link
                     print(chat_links)
-                    mk_b = InlineKeyboardBuilder()
                     mk_b.button(text='Войти в беседу', url=link.invite_link)
                     await message.answer(bot_message, reply_markup=mk_b.as_markup())
                     logger.info(f'Connected with address: {wallet_address}')
