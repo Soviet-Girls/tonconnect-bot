@@ -9,7 +9,7 @@ def generate(data: str) -> BytesIO:
         version=None,
         error_correction=qrcode_styled.ERROR_CORRECT_M,
         border=1,
-        box_size=64,
+        box_size=32,
         image_factory=PilStyledImage,
         mask_pattern=None,
     )
