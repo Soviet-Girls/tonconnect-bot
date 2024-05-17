@@ -13,7 +13,10 @@ async def get_connections():
     keys = await client.keys('*connection')
     values = await client.mget(keys)
     for i in range(len(keys)):
-        id = int(str(keys[i]).split("b'")[1].split('connection')[0])
+        try:
+            id = int(str(keys[i]).split("b'")[1].split('connection')[0])
+        except ValueError:
+            continue
         connections.append([id, values[i]])
     return connections
 
