@@ -65,4 +65,3 @@ class Sales:
         
 
 sales = Sales()
-sales.update()

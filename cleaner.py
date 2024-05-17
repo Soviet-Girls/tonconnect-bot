@@ -23,7 +23,10 @@ async def get_connections():
 async def clean(bot: Bot):
     connections = await get_connections()
     i = 0
+    steps = len(connections)
+    print(f"Checking {steps} connections")
     for connection in connections:
+        print(f"Connection {i+1}/{steps}")
         user_id = connection[0]
         connector = get_connector(user_id)
         connected = await connector.restore_connection()
