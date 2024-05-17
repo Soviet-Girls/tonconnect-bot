@@ -41,6 +41,12 @@ except Exception as e:
 async def check(address: str) -> list[Collection]:
     collections = []
 
+    side_collections = []
+    try:
+        side_collections = load()
+        print(f"{len(side_collections)}  collections loaded")
+    except Exception as e:
+        logging.exception(e)
     # добавляем основную коллекцию и ставим её на первое место
     side_collections.append(
         Collection({
